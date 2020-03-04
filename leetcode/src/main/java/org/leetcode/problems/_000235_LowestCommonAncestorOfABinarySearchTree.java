@@ -2,7 +2,7 @@ package org.leetcode.problems;
 
 /**
  * 
- * MEDIUM
+ * EASY
  * 
  * @author Alexandros Kokozidis
  *
@@ -28,17 +28,19 @@ public class _000235_LowestCommonAncestorOfABinarySearchTree {
 	}
 
 	boolean commonAncestor(TreeNode node, TreeNode p, TreeNode q) {
-		if (ancestor != null)
-			return true;
 		if (node == null)
 			return false;
+		if (ancestor != null)
+			return true;
 		boolean left = commonAncestor(node.left, p, q);
 		boolean right = commonAncestor(node.right, p, q);
-		if (left && right ||(left || right ) && (node == p || node == q)) {
+		if (left && right || ((left || right) && (node == p || node == q))) {
 			ancestor = node;
 			return true;
 		}
-		if (node == p || node == q) return true;
+		if (node == p || node == q)
+			return true;
 		return left || right;
 	}
+
 }
