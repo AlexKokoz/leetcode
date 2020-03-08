@@ -11,6 +11,7 @@ import java.util.Map;
  *
  */
 public class _000105_ConstructBinaryTreeFromPreorderAndInorderTraversal {
+
 	public class TreeNode {
 		int val;
 		TreeNode left;
@@ -55,5 +56,6 @@ public class _000105_ConstructBinaryTreeFromPreorderAndInorderTraversal {
 		node.right = build(poEnd - rightSubtreeSize + 1, poEnd, ioRootPos + 1, ioEnd);
 
 		return node;
+
 	}
 }

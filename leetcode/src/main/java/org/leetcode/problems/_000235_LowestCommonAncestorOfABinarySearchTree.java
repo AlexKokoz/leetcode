@@ -42,5 +42,4 @@ public class _000235_LowestCommonAncestorOfABinarySearchTree {
 			return true;
 		return left || right;
 	}
-
 }
