@@ -19,21 +19,20 @@ public class _000024_SwapNodesInPairs {
 	}
 
 	public ListNode swapPairs(ListNode head) {
-		return swap(head);
+		ListNode fake = new ListNode(0);
+		fake.next = swap(head);
+		return fake.next;
 	}
 
-	static ListNode swap(ListNode cur) {
-		if (cur == null)
-			return null;
-		ListNode newNode = null;
-		if (cur.next != null) {
-			newNode = new ListNode(cur.next.val);
-			newNode.next = new ListNode(cur.val);
-			newNode.next.next = swap(cur.next.next);
-		} else {
-			newNode = new ListNode(cur.val);
-		}
-		return newNode;
+	ListNode swap(ListNode node) {
+		if (node == null || node.next == null)
+			return node;
+		ListNode first = node.next;
+		ListNode second = node;
+		ListNode rest = node.next.next;
+		first.next = second;
+		second.next = swap(rest);
+		return first;
 	}
 
 }
