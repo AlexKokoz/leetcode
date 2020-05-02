@@ -11,12 +11,14 @@ import java.util.Set;
  *
  */
 public class _001346_CheckIfNandItsDoubleExist {
-	public boolean checkIfExist(int[] arr) {
-		Set<Double> set = new HashSet<>();
-		for (int x : arr) {
-			if (set.contains((double)x)) return true;
-			set.add(x * 2.0);
-			set.add(x / 2.0);
+	public boolean checkIfExist(int[] nums) {
+		Set<Integer> seen = new HashSet<>();
+		for (int num : nums) {
+			if (seen.contains(num))
+				return true;
+			seen.add(2 * num);
+			if ((num & 1) == 0) // even
+				seen.add(num / 2);
 		}
 		return false;
 	}

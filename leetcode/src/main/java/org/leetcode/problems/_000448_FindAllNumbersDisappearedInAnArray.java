@@ -11,23 +11,21 @@ import java.util.List;
  */
 public class _000448_FindAllNumbersDisappearedInAnArray {
 	public List<Integer> findDisappearedNumbers(int[] nums) {
-		final List<Integer> ans = new LinkedList<>();
-		final int n = nums.length;
+		int n = nums.length;
+		List<Integer> ans = new LinkedList<>();
 		for (int i = 0; i < n; i++) {
-			while (nums[i] != i + 1 && nums[nums[i] - 1] != nums[i]) {
-				swap(nums, i, nums[i] - 1);
-			}
+			while (nums[nums[i] - 1] != nums[i])
+				swap(i, nums[i] - 1, nums);
 		}
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < n; i++)
 			if (nums[i] != i + 1)
 				ans.add(i + 1);
-		}
 		return ans;
 	}
 
-	static void swap(int[] arr, int i, int j) {
-		final int swap = arr[i];
-		arr[i] = arr[j];
-		arr[j] = swap;
+	void swap(int i, int j, int[] nums) {
+		int swap = nums[i];
+		nums[i] = nums[j];
+		nums[j] = swap;
 	}
 }
