@@ -19,48 +19,26 @@ public class _000328_OddEvenLinkedList {
 	}
 
 	public ListNode oddEvenList(ListNode head) {
-		ListNode oddHead = head;
-		ListNode evenHead = (head != null ? head.next : null);
-		ListNode oddTail = oddHead;
-		ListNode evenTail = evenHead;
-		ListNode cur = (evenHead != null ? evenHead.next : null);
-		if (oddHead != null)
-			oddHead.next = null;
-		if (evenHead != null)
-			evenHead.next = null;
-		boolean odd = true;
-		while (cur != null) {
-			if (odd) {
-				oddTail.next = cur;
-				oddTail = oddTail.next;
-
+		ListNode fakeOddsHead = new ListNode(0);
+		ListNode fakeEvensHead = new ListNode(0);
+		ListNode lastOdd = fakeOddsHead;
+		ListNode lastEven = fakeEvensHead;
+		ListNode cur = head;
+		for (int i = 1; cur != null; i++) {
+			if (i % 2 == 1) {
+				lastOdd.next = cur;
+				lastOdd = cur;
+				cur = cur.next;
+				lastOdd.next = null;
 			} else {
-				evenTail.next = cur;
-				evenTail = evenTail.next;
-
+				lastEven.next = cur;
+				lastEven = cur;
+				cur = cur.next;
+				lastEven.next = null;
 			}
-			odd = !odd;
-			cur = cur.next;
-			oddTail.next = null;
-			evenTail.next = null;
 		}
-		if (oddTail != null)
-			oddTail.next = evenHead;
-		return oddHead;
+		lastOdd.next = fakeEvensHead.next;
+		return fakeOddsHead.next;
 	}
 
-	// Editorial Solution :'(
-//	public ListNode oddEvenList(ListNode head) {
-//		if (head == null)
-//			return null;
-//		ListNode odd = head, even = head.next, evenHead = even;
-//		while (even != null && even.next != null) {
-//			odd.next = even.next;
-//			odd = odd.next;
-//			even.next = odd.next;
-//			even = even.next;
-//		}
-//		odd.next = evenHead;
-//		return head;
-//	}
 }
