@@ -27,7 +27,7 @@ public class _000373_FindKPairsWithSmallestSums {
 			int[] cur = pq.poll();
 			int i1 = cur[1];
 			int i2 = cur[2];
-			List<Integer> pair = new LinkedList();
+			List<Integer> pair = new LinkedList<>();
 			pair.add(nums1[i1]);
 			pair.add(nums2[i2]);
 			ans.add(pair);
