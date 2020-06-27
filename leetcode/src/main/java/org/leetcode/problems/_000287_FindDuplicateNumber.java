@@ -1,0 +1,25 @@
+package org.leetcode.problems;
+
+/**
+ * 
+ * MEDIUM
+ * 
+ * @author Alexandros Kokozidis
+ *
+ */
+public class _000287_FindDuplicateNumber {
+	public int findDuplicate(int[] nums) {
+		int slow = nums[0];
+		int fast = nums[0];
+		do {
+			slow = nums[slow];
+			fast = nums[nums[fast]];
+		} while (slow != fast);
+		slow = nums[0];
+		while (slow != fast) {
+			slow = nums[slow];
+			fast = nums[fast];
+		}
+		return slow;
+	}
+}
