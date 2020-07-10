@@ -1,6 +1,6 @@
 package org.leetcode.problems;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,33 +21,28 @@ public class _000662_MaximumWidthOfBinaryTree {
 		}
 	}
 
+	List<int[]> minmax;
+
 	public int widthOfBinaryTree(TreeNode root) {
-		List<List<Integer>> list = new LinkedList<>();
-		traverse(root, 1, 1, list);
-		int max = Integer.MIN_VALUE;
-		for (List<Integer> level : list) {
-			if (level.size() == 1)
-				max = Math.max(max, 1);
-			else {
-				int left = level.get(0);
-				int right = level.get(level.size() - 1);
-				max = Math.max(max, right - left + 1);
-			}
-		}
-		return max;
+		minmax = new ArrayList<>();
+		dfs(root, 1, 0);
+		int ans = 0;
+		for (int[] row : minmax)
+			ans = Math.max(ans, row[1] - row[0] + 1);
+		return ans;
 	}
 
-	void traverse(TreeNode node, int curLevel, int index, List<List<Integer>> list) {
+	void dfs(TreeNode node, int id, int level) {
 		if (node == null)
 			return;
-		if (curLevel > list.size()) {
-			List<Integer> row = new LinkedList<>();
-			row.add(index);
-			list.add(row);
-		} else {
-			list.get(curLevel - 1).add(index);
+		if (level == minmax.size()) {
+			minmax.add(new int[] { Integer.MAX_VALUE, Integer.MIN_VALUE });
 		}
-		traverse(node.left, curLevel + 1, 2 * index, list);
-		traverse(node.right, curLevel + 1, 2 * index + 1, list);
+		int[] a = minmax.get(level);
+		a[0] = Math.min(a[0], id);
+		a[1] = Math.max(a[1], id);
+		int nid = id << 1;
+		dfs(node.left, nid, level + 1);
+		dfs(node.right, nid + 1, level + 1);
 	}
 }

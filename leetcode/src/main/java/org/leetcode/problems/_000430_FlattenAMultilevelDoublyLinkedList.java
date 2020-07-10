@@ -16,33 +16,33 @@ public class _000430_FlattenAMultilevelDoublyLinkedList {
 	}
 
 	public Node flatten(Node head) {
-		getLastChild(head);
-		return head;
+		return head == null ? null : helper1(head)[0];
 	}
 
-	Node getLastChild(Node cur) {
+	Node[] helper1(Node node) {
+		if (node == null)
+			return null;
+		Node[] ret = new Node[2];
+		ret[0] = node;
+		Node cur = node;
 		Node prev = null;
 		while (cur != null) {
-			if (cur.child != null) {
-				Node lastChild = getLastChild(cur.child);
-				cur.child.prev = cur;
-				Node next = cur.next;
-				cur.next = cur.child;
+			Node next = cur.next;
+			prev = cur;
+			Node[] ch = helper1(cur.child);
+			if (ch != null) {
 				cur.child = null;
-				lastChild.next = next;
+				cur.next = ch[0];
+				ch[0].prev = cur;
+				ch[1].next = next;
+				prev = ch[1];
 				if (next != null) {
-					prev = lastChild;
-					next.prev = lastChild;
-					cur = next;
-				} else {
-					prev = lastChild;
-					cur = lastChild;
+					next.prev = ch[1];
 				}
-			} else {
-				prev = cur;
-				cur = cur.next;
 			}
+			cur = next;
 		}
-		return prev;
+		ret[1] = prev;
+		return ret;
 	}
 }

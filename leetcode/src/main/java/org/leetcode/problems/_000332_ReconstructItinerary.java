@@ -14,6 +14,7 @@ import java.util.Map;
  *
  */
 public class _000332_ReconstructItinerary {
+
 	public List<String> findItinerary(List<List<String>> tickets) {
 		List<String> ans = new LinkedList<>();
 		Map<String, List<String>> map = new HashMap<>();
