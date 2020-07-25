@@ -8,38 +8,39 @@ package org.leetcode.problems;
  *
  */
 public class _000079_WordSearch {
-	int[] dr = new int[] { 1, 0, -1, 0 };
-	int[] dc = new int[] { 0, 1, 0, -1 };
+	int[] dr4 = { 1, 0, -1, 0 };
+	int[] dc4 = { 0, 1, 0, -1 };
+	boolean ans;
 
 	public boolean exist(char[][] board, String word) {
 		int n = board.length;
 		int m = board[0].length;
 		boolean[][] seen = new boolean[n][m];
-
 		for (int r = 0; r < n; r++) {
 			for (int c = 0; c < m; c++) {
-				if (backtrack(r, c, board, seen, word, 0))
+				dfs(r, c, board, word, 0, seen);
+				if (ans)
 					return true;
 			}
 		}
 		return false;
 	}
 
-	boolean backtrack(int r, int c, char[][] board, boolean[][] seen, String word, int d) {
-		if (r < 0 || c < 0 || r == board.length || c == board[0].length || seen[r][c])
-			return false;
-		if (d == word.length())
-			return true;
-		if (board[r][c] != word.charAt(d))
-			return false;
+	void dfs(int r, int c, char[][] board, String word, int d, boolean[][] seen) {
+		if (ans || seen[r][c] || board[r][c] != word.charAt(d))
+			return;
+		if (d == word.length() - 1) {
+			ans = true;
+			return;
+		}
 		seen[r][c] = true;
-		for (int dir = 0; dir < 4; dir++) {
-			int nr = r + dr[dir];
-			int nc = c + dc[dir];
-			if (backtrack(nr, nc, board, seen, word, d + 1))
-				return true;
+		for (int i = 0; i < 4; i++) {
+			int nr = r + dr4[i];
+			int nc = c + dc4[i];
+			if (nr < 0 || nc < 0 || nr == board.length || nc == board[0].length)
+				continue;
+			dfs(nr, nc, board, word, d + 1, seen);
 		}
 		seen[r][c] = false;
-		return false;
 	}
 }
