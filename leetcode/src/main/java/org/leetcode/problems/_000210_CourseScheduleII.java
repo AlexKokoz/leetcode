@@ -11,48 +11,64 @@ import java.util.*;
  */
 public class _000210_CourseScheduleII {
 
-	public int[] findOrder(int numCourses, int[][] prerequisites) {
-		@SuppressWarnings("unchecked")
-		List<Integer>[] adj = new List[numCourses];
-		for (int i = 0; i < numCourses; i++)
-			adj[i] = new LinkedList<>();
-		for (int[] prerequisite : prerequisites)
-			adj[prerequisite[1]].add(prerequisite[0]);
-		int[] order = new int[numCourses];
-		int index = 0;
-		Iterable<Integer> sorted = topologicalSort(adj, numCourses);
+
+	public int[] findOrder(int n, int[][] prerequisites) {
+		int p = prerequisites.length;
+		int[] from = new int[p];
+		int[] to = new int[p];
+		for (int i = 0; i < p ; i++) {
+			from[i] = prerequisites[i][1];
+			to[i] = prerequisites[i][0];
+		}
+		int[][] adj = packD(n, from, to);
+		Iterable<Integer> sorted = iterativeTopologicalSort(adj);
 		if (sorted == null)
 			return new int[0];
+		int index = 0;
+		int[] order = new int[n];
 		for (int course : sorted)
 			order[index++] = course;
 		return order;
 	}
 
-	Iterable<Integer> topologicalSort(List<Integer>[] adj, int n) {
-		List<Integer> sorted = new LinkedList<>();
-		int[] status = new int[n];
-		Stack<Integer> stack = new Stack<>();
-		for (int i = 0; i < n; i++)
-			if (!dfs(-1, i, adj, status, stack))
-				return null;
-		while (!stack.isEmpty())
-			sorted.add(stack.pop());
-		return sorted;
-	}
-
-	boolean dfs(int p, int ch, List<Integer>[] adj, int[] status, Stack<Integer> stack) {
-		final int PROCESSING = 1, PROCESSED = 2; // UNPROCESSED = 0
-		if (status[ch] == PROCESSED)
-			return true;
-		if (status[ch] == PROCESSING)
-			return false;
-		status[ch] = PROCESSING;
-		for (int nch : adj[ch]) {
-			if (!dfs(ch, nch, adj, status, stack))
-				return false;
+	
+	static Iterable<Integer> iterativeTopologicalSort(int[][] adj) {
+		int n = adj.length;
+		int[] indeg = new int[n];
+		for (int from = 0; from < n; from++) {
+			for (int to : adj[from]) {
+				indeg[to]++;
+			}
 		}
-		status[ch] = PROCESSED;
-		stack.add(ch);
-		return true;
+		Queue<Integer> q = new LinkedList<>();
+		for (int v = 0; v < n; v++) {
+			if (indeg[v] == 0) {
+				q.add(v);
+			}
+		}
+		Queue<Integer> sorted = new LinkedList<>();
+		while (!q.isEmpty()) {
+			int cur = q.poll();
+			sorted.add(cur);
+			for (int to : adj[cur]) {
+				indeg[to]--;
+				if (indeg[to] == 0)
+					q.add(to);
+			}
+		}
+		return sorted.size() == n ? sorted : null;
+	}
+	
+	
+	 int[][] packD(int n, int[] from, int[] to) {
+		int[] out = new int[n];
+		for (int i = 0; i < from.length; i++)
+			out[from[i]]++;
+		int[][] ret = new int[n][];
+		for (int i = 0; i < ret.length; i++)
+			ret[i] = new int[out[i]];
+		for (int i = 0; i < from.length; i++)
+			ret[from[i]][--out[from[i]]] = to[i];
+		return ret;
 	}
 }

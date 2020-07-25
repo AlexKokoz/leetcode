@@ -19,16 +19,12 @@ public class _000203_RemoveLinkedListElements {
 
 	public ListNode removeElements(ListNode head, int val) {
 		ListNode fake = new ListNode(0);
-		ListNode last = fake;
-		ListNode cur = head;
-		while (cur != null) {
-			if (cur.val != val) {
-				last.next = cur;
-				last = cur;
-			}
-			cur = cur.next;
-		}
-		last.next = null;
-		return fake.next;
+	        fake.next = head;
+	        ListNode cur = fake;
+	        while(cur != null) {
+	            while(cur.next != null && cur.next.val == val) cur.next = cur.next.next;
+	            cur = cur.next;
+	        }
+	        return fake.next;
 	}
 }
