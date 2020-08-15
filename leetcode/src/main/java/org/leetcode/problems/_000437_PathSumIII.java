@@ -22,32 +22,34 @@ public class _000437_PathSumIII {
 		}
 	}
 
-	int count;
+	int ans;
 
 	public int pathSum(TreeNode root, int sum) {
-		Map<Integer, Integer> map = new HashMap<>();
-		count(root, sum, map);
-		return count;
+		dfs(root, sum);
+		return ans;
 	}
 
-	void count(TreeNode node, int sum, Map<Integer, Integer> map) {
+	Map<Integer, Integer> dfs(TreeNode node, int sum) {
 		if (node == null)
-			return;
-		Map<Integer, Integer> nmap = new HashMap<>();
-		for (int x : map.keySet()) {
-			int f = map.get(x);
-			int nx = x - node.val;
-			if (nx == 0)
-				count += f;
-			nmap.put(nx, f);
+			return new HashMap<>();
+		Map<Integer, Integer> left = dfs(node.left, sum);
+		Map<Integer, Integer> right = dfs(node.right, sum);
+		Map<Integer, Integer> ret = new HashMap<>();
+		for (int key : left.keySet()) {
+			int nsum = key + node.val;
+			if (nsum == sum)
+				ans += left.get(key);
+			ret.put(nsum, ret.getOrDefault(nsum, 0) + left.get(key));
+		}
+		for (int key : right.keySet()) {
+			int nsum = key + node.val;
+			if (nsum == sum)
+				ans += right.get(key);
+			ret.put(nsum, ret.getOrDefault(nsum, 0) + right.get(key));
 		}
 		if (node.val == sum)
-			count++;
-		int nx = sum - node.val;
-		Integer f = nmap.get(nx);
-		nmap.put(nx, (f == null ? 1 : f + 1));
-		Map<Integer, Integer> copyMap = new HashMap<>(nmap);
-		count(node.left, sum, nmap);
-		count(node.right, sum, copyMap);
+			ans++;
+		ret.put(node.val, ret.getOrDefault(node.val, 0) + 1);
+		return ret;
 	}
 }
