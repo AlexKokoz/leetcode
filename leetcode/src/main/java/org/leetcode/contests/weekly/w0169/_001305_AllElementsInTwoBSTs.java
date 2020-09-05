@@ -1,8 +1,7 @@
 package org.leetcode.contests.weekly.w0169;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * MEDIUM
@@ -22,42 +21,36 @@ public class _001305_AllElementsInTwoBSTs {
 		}
 	}
 
+	List<Integer> nums1;
+	List<Integer> nums2;
+
 	public List<Integer> getAllElements(TreeNode root1, TreeNode root2) {
-		final List<Integer> ans = new LinkedList<>();
-		final List<Integer> list1 = new LinkedList<>();
-		final List<Integer> list2 = new LinkedList<>();
-		inorder(root1, list1);
-		inorder(root2, list2);
-		merge(list1, list2, ans);
+		nums1 = new ArrayList<>();
+		nums2 = new ArrayList<>();
+		inorder(root1, nums1);
+		inorder(root2, nums2);
+		List<Integer> ans = new ArrayList<>();
+		int i = 0;
+		int j = 0;
+		while (i < nums1.size() || j < nums2.size()) {
+			if (i < nums1.size() && (j >= nums2.size() || nums1.get(i) <= nums2.get(j)))
+				ans.add(nums1.get(i++));
+			else 
+				ans.add(nums2.get(j++));
+		}
 		return ans;
 	}
 
-	static void inorder(TreeNode node, List<Integer> list) {
+	void inorder(TreeNode node, List<Integer> list) {
 		if (node == null)
 			return;
-
+		if (node.left == node.right) {
+			list.add(node.val);
+			return;
+		}
 		inorder(node.left, list);
 		list.add(node.val);
 		inorder(node.right, list);
-	}
-
-	static void merge(List<Integer> l1, List<Integer> l2, List<Integer> ans) {
-		final int n1 = l1.size();
-		final int n2 = l2.size();
-		int i = 0;
-		int j = 0;
-		while (i < n1 || j < n2) {
-			if (i == n1)
-				while (j < n2)
-					ans.add(l2.get(j++));
-			else if (j == n2)
-				while (i < n1)
-					ans.add(l1.get(i++));
-			else if (l1.get(i) <= l2.get(j))
-				ans.add(l1.get(i++));
-			else
-				ans.add(l2.get(j++));
-		}
 	}
 
 }

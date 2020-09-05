@@ -1,8 +1,5 @@
 package org.leetcode.problems;
 
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * 
  * MEDIUM
@@ -11,258 +8,167 @@ import java.util.List;
  *
  */
 public class _000731_MyCalendarII {
-	static class MyCalendarTwo {
+	class MyCalendarTwo {
 
-		IntervalTree<Integer> tree;
+		SegmentTreeMax tree;
 
 		public MyCalendarTwo() {
-			tree = new IntervalTree<>();
+			tree = new SegmentTreeMax(0, (int) 1e9);
 		}
 
 		public boolean book(int start, int end) {
-			end--;
-			List<IntervalTree.Interval> intervals = tree.searchAll(start, end);
-			for (IntervalTree.Interval interval : intervals) {
-				int count = tree.get(interval.l, interval.r);
-				if (count == 2)
-					return false;
-				int nl = Math.max(start, interval.l);
-				int nr = Math.min(end, interval.r);
-				if (tree.intersectsAtLeast(nl, nr, 2))
-					return false;
+			tree.update(start, end - 1, 1);
+			if (tree.query(start, end - 1) > 2) {
+				tree.update(start, end - 1, -1);
+				return false;
 			}
-			Integer count = tree.get(start, end);
-			tree.put(start, end, 1 + (count != null ? count : 0));
 			return true;
-
 		}
 
-		static class IntervalTree<V> {
-			private Node<V> root;
-			private int size;
+		class SegmentTreeMax {
+			private Node root;
 
-			public boolean contains(int l, int r) {
-				return get(l, r) != null;
+			public SegmentTreeMax(int from, int to) {
+				root = new Node(from, to, 0);
 			}
 
-			public V get(int l, int r) {
-				assert l <= r;
-				Node<V> x = get(root, new Interval(l, r));
-				return x == null ? null : x.val;
+			public SegmentTreeMax(int n) {
+				root = new Node(0, n - 1, 0);
 			}
 
-			private Node<V> get(Node<V> node, Interval interval) {
-				if (node == null)
-					return null;
-				int cmp = interval.compareTo(node.interval);
-				if (cmp < 0)
-					return get(node.left, interval);
-				else if (cmp > 0)
-					return get(node.right, interval);
-				else
-					return node;
+			public SegmentTreeMax(int[] nums) {
+				int n = nums.length;
+				root = new Node(0, n - 1, 0);
+				for (int i = 0; i < n; i++)
+					update(i, nums[i]);
 			}
 
-			public void put(int l, int r, V val) {
-				assert l <= r;
-				root = put(root, new Interval(l, r), val);
+			public void update(int qFrom, int qTo, long val) {
+				validate(qFrom);
+				validate(qTo);
+				root = update(root, qFrom, qTo, val);
+
 			}
 
-			private Node<V> put(Node<V> node, Interval interval, V val) {
-				if (node == null) {
-					size++;
-					return new Node<>(interval, val);
-				}
-				int cmp = interval.compareTo(node.interval);
-				if (cmp < 0) {
-					node.left = put(node.left, interval, val);
-					node = rotR(node);
-				} else if (cmp > 0) {
-					node.right = put(node.right, interval, val);
-					node = rotL(node);
-				} else {
-					node.val = val;
-				}
-				update(node);
-				return node;
+			public void update(int i, long val) {
+				validate(i);
+				update(i, i, val);
 			}
 
-			public Interval search(int l, int r) {
-				assert l <= r;
-				return search(root, new Interval(l, r));
-			}
-
-			private Interval search(Node<V> node, Interval interval) {
-				if (node == null)
-					return null;
-				if (node.interval.intersects(interval))
-					return new Interval(node.interval);
-				else if (node.left == null)
-					return search(node.right, interval);
-				else if (node.left.max < interval.l)
-					return search(node.right, interval);
-				else
-					return search(node.left, interval);
-			}
-
-			public List<Interval> searchAll(int l, int r) {
-				LinkedList<Interval> list = new LinkedList<>();
-				searchAll(root, new Interval(l, r), list);
-				return list;
-			}
-
-			public boolean intersectsAtLeast(int l, int r, int targetCount) {
-				int[] currentCount = new int[1];
-				intersectsAtLeast(root, new Interval(l, r), currentCount, targetCount);
-				return currentCount[0] >= targetCount;
-			}
-
-			private void intersectsAtLeast(Node<V> node, Interval interval, int[] currentCount,
-					int targetCount) {
-				if (currentCount[0] >= targetCount)
-					return;
-				if (node == null)
-					return;
-
-				if (interval.intersects(node.interval)) {
-					currentCount[0]++;
-					if (currentCount[0] >= targetCount)
-						return;
-				}
-				if (node.left != null && interval.l <= node.left.max)
-					intersectsAtLeast(node.left, interval, currentCount, targetCount);
-				if (node.right != null && node.right.max >= interval.l)
-					intersectsAtLeast(node.right, interval, currentCount, targetCount);
-			}
-
-			public int size() {
-				return size;
+			public long query(int qFrom, int qTo) {
+				return query(root, qFrom, qTo);
 			}
 
 			public String toString() {
-				return toString(root, " ", 0);
+				return root.toString();
 			}
+			// ================================================================================
+			// PRIVATE METHODS
+			// ================================================================================
 
-			private String toString(Node<V> node, String indent, int level) {
-				StringBuilder sb = new StringBuilder();
-				for (int i = 0; i < level; i++)
-					sb.append(indent);
-				sb.append(node.interval).append(" val = " + node.val).append(" max = " + node.max)
-						.append(" size = " + node.size).append("\n");
-				if (node.left != null)
-					sb.append(toString(node.left, indent, level + 1));
-				if (node.right != null)
-					sb.append(toString(node.right, indent, level + 1));
-				return sb.toString();
-			}
+			private Node update(Node node, int qFrom, int qTo, long val) {
+				if (qFrom > qTo || node == null || !node.intersects(qFrom, qTo))
+					return node;
 
-			private boolean searchAll(Node<V> node, Interval interval, LinkedList<Interval> list) {
-				boolean f1 = false, f2 = false, f3 = false;
-				if (node == null)
-					return false;
-
-				if (interval.intersects(node.interval)) {
-					list.add(new Interval(node.interval.l, node.interval.r));
-					f1 = true;
+				if (node.coveredBy(qFrom, qTo)) {
+					node.val += val;
+					node.lazyVal += val;
+					return node;
 				}
-				if (node.left != null && interval.l <= node.left.max)
-					f2 = searchAll(node.left, interval, list);
-				if (node.right != null && node.right.max >= interval.l)
-					f3 = searchAll(node.right, interval, list);
-				return f1 || f2 || f3;
+
+				node = propagate(node);
+
+				node.lChild = update(node.lChild, qFrom, qTo, val);
+				node.rChild = update(node.rChild, qFrom, qTo, val);
+
+				node.val = Math.max(node.lChild.val, node.rChild.val);
+
+				return node;
 			}
 
-			private void update(Node<V> node) {
-				node.size = 1 + size(node.left) + size(node.right);
-				node.max = max(node);
+			private Node propagate(Node node) {
+				assert node != null;
+				if (node.from < node.to) {
+					if (node.lChild == null || node.rChild == null) {
+						int mid = node.from + (node.to - node.from) / 2;
+						node.lChild = new Node(node.from, mid, node.lazyVal);
+						node.lChild.lazyVal = node.lazyVal;
+						node.rChild = new Node(mid + 1, node.to, node.lazyVal);
+						node.rChild.lazyVal = node.lazyVal;
+					} else if (node.lazyVal != 0) {
+						node.lChild.val += node.lazyVal;
+						node.lChild.lazyVal += node.lazyVal;
+						node.rChild.val += node.lazyVal;
+						node.rChild.lazyVal += node.lazyVal;
+					}
+				}
+				node.lazyVal = 0;
+				return node;
 			}
 
-			private int size(Node<V> node) {
-				return node == null ? 0 : node.size;
+			private long query(Node node, int qFrom, int qTo) {
+				if (qFrom > qTo || node == null || !node.intersects(qFrom, qTo))
+					return Long.MIN_VALUE;
+				if (node.coveredBy(qFrom, qTo))
+					return node.val;
+				propagate(node);
+				return Math.max(query(node.lChild, qFrom, qTo), query(node.rChild, qFrom, qTo));
 			}
 
-			private int max(Node<V> node) {
-				return node == null ? Integer.MIN_VALUE
-						: Math.max(node.interval.r, Math.max(max(node.left), max(node.right)));
+			private void validate(int point) {
+				assert point >= root.from;
+				assert point <= root.to;
 			}
 
-			private Node<V> rotL(Node<V> node) {
-				Node<V> right = node.right;
-				node.right = right.left;
-				right.left = node;
-				update(node);
-				update(right);
-				return right;
-			}
+			// ================================================================================
+			// NESTED CLASSES
+			// ================================================================================
+			class Node {
+				final int from;
+				final int to;
+				Node lChild;
+				Node rChild;
+				long val;
+				long lazyVal;
 
-			private Node<V> rotR(Node<V> node) {
-				Node<V> left = node.left;
-				node.left = left.right;
-				left.right = node;
-				update(node);
-				update(left);
-				return left;
-			}
-
-			private static class Node<V> {
-				Interval interval;
-				private Node<V> left, right;
-				private V val;
-				public int max;
-				private int size;
-
-				public Node(Interval interval, V val) {
-					this.interval = new Interval(interval.l, interval.r);
-					this.max = interval.r;
-					this.size = 1;
+				public Node(int from, int to, long val) {
+					this.from = from;
+					this.to = to;
 					this.val = val;
 				}
-			}
 
-			public static class Interval implements Comparable<Interval> {
-				int l, r;
-
-				public Interval(int l, int r) {
-					this.l = l;
-					this.r = r;
+				private boolean coveredBy(int qFrom, int qTo) {
+					return qFrom <= from && qTo >= to;
 				}
 
-				public Interval(Interval interval) {
-					this.l = interval.l;
-					this.r = interval.r;
-				}
-
-				@Override
-				public int compareTo(Interval that) {
-					return l > that.l ? 1 : l < that.l ? -1 : r > that.r ? 1 : r < that.r ? -1 : 0;
-				}
-
-				public boolean intersects(Interval that) {
-					return l <= that.r && that.l <= r;
+				private boolean intersects(int qFrom, int qTo) {
+					return qFrom <= to && from <= qTo;
 				}
 
 				public String toString() {
-					return l + "-" + r;
+					return toString("  ", 0);
 				}
 
-				public int hashCode() {
-					int hash = 7;
-					hash = 31 * hash + l;
-					hash = 31 * hash + r;
-					return hash;
+				private String toString(String indent, int level) {
+					StringBuilder sb = new StringBuilder();
+					for (int i = 0; i < level; i++)
+						sb.append(indent);
+					sb.append("Node[ range=[");
+					sb.append(from);
+					sb.append(",");
+					sb.append(to);
+					sb.append("] value=[");
+					sb.append(val);
+					sb.append("] lazy=[");
+					sb.append(lazyVal);
+					sb.append("] ]");
+					sb.append("\n");
+					if (lChild != null)
+						sb.append(lChild.toString(indent, level + 1));
+					if (rChild != null)
+						sb.append(rChild.toString(indent, level + 1));
+					return sb.toString();
 				}
-
-				public boolean equals(Object o) {
-					if (o == null)
-						return false;
-					if (o == this)
-						return true;
-					if (this.getClass() != this.getClass())
-						return false;
-					Interval that = (Interval) o;
-					return this.l == that.l && this.r == that.r;
-				}
-
 			}
 		}
 	}
