@@ -1,6 +1,10 @@
 package org.leetcode.problems;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 
@@ -11,55 +15,54 @@ import java.util.*;
  */
 public class _000399_EvaluateDivision {
 	public double[] calcEquation(List<List<String>> equations, double[] values, List<List<String>> queries) {
-		// create adjacency map; each String vertex mapped to a map of vertex-weight
-		// pairs
+
+		double[] ans = new double[queries.size()];
+
+		// adj list
 		Map<String, Map<String, Double>> adj = new HashMap<>();
 		for (int i = 0; i < equations.size(); i++) {
-			List<String> e = equations.get(i);
-			adj.computeIfAbsent(e.get(0), k -> new HashMap<>()).put(e.get(1), values[i]);
-			adj.computeIfAbsent(e.get(1), k -> new HashMap<>()).put(e.get(0), 1 / values[i]);
+			String varA = equations.get(i).get(0);
+			String varB = equations.get(i).get(1);
+			double val = values[i];
+			adj.computeIfAbsent(varA, k -> new HashMap<>()).put(varB, val);
+			adj.computeIfAbsent(varB, k -> new HashMap<>()).put(varA, 1 / val);
 		}
 
-		// dfs from numerator to denominator
-		double[] ans = new double[queries.size()];
-		Arrays.fill(ans, 1);
 		for (int i = 0; i < queries.size(); i++) {
-			List<String> q = queries.get(i);
-			boolean[] terminate = new boolean[1];
-			Stack<Double> path = new Stack<>();
-			if (!adj.containsKey(q.get(0)) || !adj.containsKey(q.get(1))) {
+			String varA = queries.get(i).get(0);
+			String varB = queries.get(i).get(1);
+			boolean[] found = new boolean[1];
+			if (!adj.containsKey(varA) || !adj.containsKey(varB)) {
 				ans[i] = -1;
-				continue;
-			} else if (q.get(0).equals(q.get(1))) {
-				continue;
+			} else {
+				double[] result = new double[1];
+				Set<String> seen = new HashSet<>();
+				seen.add(varA);
+				dfs(varA, varB, adj, 1, result, found, seen);
+				ans[i] = result[0] == 0 ? -1 : result[0];
 			}
-			dfs("", q.get(0), q.get(1), adj, path, terminate);
-			if (terminate[0]) {
-				while (!path.isEmpty())
-					ans[i] *= path.pop();
-			} else
-				ans[i] = -1;
 		}
+
 		return ans;
+
 	}
 
-	void dfs(String p, String ch, String target, Map<String, Map<String, Double>> adj, Stack<Double> path,
-			boolean[] terminate) {
-		if (terminate[0])
+	void dfs(String now, String dest, Map<String, Map<String, Double>> adj, double cur, double[] result,
+			boolean[] found, Set<String> seen) {
+		if (found[0])
 			return;
-		for (String nch : adj.get(ch).keySet()) {
-			if (p.equals(nch))
+		if (now.equals(dest) || cur == 0) {
+			result[0] = cur;
+			found[0] = true;
+			return;
+		}
+		for (String next : adj.get(now).keySet()) {
+			if (seen.contains(next))
 				continue;
-			double val = adj.get(ch).get(nch);
-			path.add(val);
-			if (nch.equals(target)) {
-				terminate[0] = true;
-				return;
-			}
-			dfs(ch, nch, target, adj, path, terminate);
-			if (terminate[0])
-				return;
-			path.pop();
+			seen.add(next);
+			double val = adj.get(now).get(next);
+			dfs(next, dest, adj, cur * val, result, found, seen);
+			seen.remove(next);
 		}
 	}
 }
